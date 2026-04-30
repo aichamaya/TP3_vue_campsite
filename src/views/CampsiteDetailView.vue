@@ -103,7 +103,7 @@
       </aside>
     </section>
   </div>
-</template
+</template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
@@ -233,6 +233,9 @@ onMounted(async () => {
   }
 })
 </script>
+
+
+
 <style scoped>
 .detail-view {
   display: grid;
