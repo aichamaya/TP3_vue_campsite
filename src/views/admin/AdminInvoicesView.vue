@@ -203,7 +203,9 @@ async function loadData() {
       ),
       reservationsStore.fetchReservations({ status: 'confirmed' }),
     ])
-  } catch {}
+  } catch { 
+    invoicesStore.error = 'Erreur lors du chargement des donnees.'
+  }
 }
 
 async function handleCreateInvoice() {
@@ -219,7 +221,9 @@ async function handleCreateInvoice() {
     success.value = 'Facture creee avec succes.'
     reservationId.value = ''
     await loadData()
-  } catch {}
+  } catch {
+    invoicesStore.error = 'Erreur lors de la creation de la facture.'
+  }
 }
 
 async function sendInvoice(item) {
@@ -229,7 +233,9 @@ async function sendInvoice(item) {
     await invoicesStore.updateInvoiceStatus(item._id, 'sent')
     success.value = 'Facture envoyee.'
     await loadData()
-  } catch {}
+  } catch {
+    invoicesStore.error = 'Erreur lors de l envoi de la facture.'
+  }
 }
 
 onMounted(async () => {

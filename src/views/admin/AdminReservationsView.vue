@@ -167,7 +167,9 @@ async function loadReservations() {
     await reservationsStore.fetchReservations(
       activeFilter.value === 'all' ? {} : { status: activeFilter.value },
     )
-  } catch {}
+  } catch { 
+    reservationsStore.error = 'Erreur lors du chargement des donnees.'
+  }
 }
 
 async function updateStatus(item, status) {
@@ -177,7 +179,9 @@ async function updateStatus(item, status) {
     await reservationsStore.updateReservationStatus(item._id, status)
     success.value = 'Statut de reservation mis a jour.'
     await loadReservations()
-  } catch {}
+  } catch { 
+    reservationsStore.error = 'Erreur lors de la mise a jour du statut de la reservation.'
+  }
 }
 
 onMounted(async () => {
