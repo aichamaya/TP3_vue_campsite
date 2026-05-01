@@ -1,11 +1,11 @@
 <template>
   <div class="min-h-[calc(100vh-8rem)] flex items-center justify-center bg-slate-50 px-4">
     <div class="text-center max-w-md">
-      <!-- Illustration -->
+     
       <div class="flex justify-center mb-8">
         <div class="relative">
           <svg viewBox="0 0 200 180" class="w-48 h-48" fill="none">
-            <!-- Mountain -->
+            
             <polygon
               points="100,20 175,150 25,150"
               fill="#dbeafe"
@@ -13,7 +13,7 @@
               stroke-width="3"
             />
             <polygon points="100,55 145,150 55,150" fill="#bfdbfe" />
-            <!-- Snow cap -->
+            
             <polygon
               points="100,20 120,60 80,60"
               fill="white"
