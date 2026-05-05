@@ -2,7 +2,6 @@
   <section class="auth-view">
     <div class="auth-card">
       <div class="auth-card-head">
-        <span class="auth-kicker">Connexion</span>
         <h1>Se connecter</h1>
         <p>Entre ton courriel et ton mot de passe pour acceder a ton compte.</p>
       </div>
@@ -106,32 +105,34 @@ async function handleSubmit() {
 }
 
 .auth-card {
-  width: min(100%, 620px);
-  padding: 1.75rem;
+  width: min(100%, 480px);
+  padding: 2.5rem;
   border-radius: 1.5rem;
   background: #ffffff;
-  border: 1px solid #d9e2ec;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  border: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
 .auth-card-head h1 {
-  margin-top: 0.75rem;
-  font-size: 2rem;
-  color: #102a43;
+  margin-top: 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
 }
 
 .auth-card-head p {
-  margin-top: 0.5rem;
-  color: #52606d;
+  margin-top: 0.4rem;
+  color: var(--color-text-soft);
+  font-size: 0.92rem;
 }
 
 .auth-kicker {
   display: inline-flex;
-  padding: 0.35rem 0.75rem;
+  padding: 0.3rem 0.85rem;
   border-radius: 999px;
-  background: #eaf2fb;
-  color: #2b6cb0;
-  font-size: 0.75rem;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-dark);
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -139,41 +140,60 @@ async function handleSubmit() {
 
 .auth-form {
   display: grid;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 1.1rem;
+  margin-top: 1.75rem;
 }
 
 .field-group {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.4rem;
 }
 
 .field-group span {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #243b53;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .field-group input {
-  min-height: 3rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid #cbd2d9;
-  border-radius: 0.9rem;
-  background: #f8fafc;
+  min-height: 2.8rem;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: #f9fafb;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.field-group input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background: #fff;
 }
 
 .field-error {
-  color: #b91c1c;
-  font-weight: 700;
+  color: #dc2626;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .submit-button {
-  min-height: 3rem;
+  margin-top: 0.5rem;
+  min-height: 2.9rem;
   border: none;
   border-radius: 999px;
-  background: #2b6cb0;
+  background: var(--color-accent);
   color: #ffffff;
   font-weight: 700;
+  font-size: 1rem;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: var(--color-accent-dark);
+  transform: translateY(-1px);
 }
 
 .submit-button:disabled {
@@ -184,12 +204,13 @@ async function handleSubmit() {
 .auth-switch {
   margin-top: 1.25rem;
   text-align: center;
-  color: #52606d;
+  font-size: 0.9rem;
+  color: var(--color-text-soft);
 }
 
 .auth-switch-link {
-  margin-left: 0.35rem;
-  color: #2b6cb0;
+  margin-left: 0.3rem;
+  color: var(--color-accent-dark);
   font-weight: 700;
 }
 

@@ -10,8 +10,14 @@
 
     <footer class="app-footer">
       <div class="app-footer-inner">
-        <span class="footer-brand">CampXplore</span>
-        <p class="footer-copy">Camping, reservation et gestion en ligne.</p>
+        <div class="footer-brand-block">
+          <img src="/logo.png" alt="logo" class="footer-logo" />
+          <div>
+            <span class="footer-brand">CampXplore</span>
+            <p class="footer-tagline">Camping, réservation et gestion en ligne.</p>
+          </div>
+        </div>
+        <p class="footer-copy">© 2025 CampXplore — Tous droits réservés.</p>
       </div>
     </footer>
   </div>
@@ -52,25 +58,48 @@ onMounted(() => {
 }
 
 .app-footer {
-  border-top: 1px solid var(--color-border);
-  background: linear-gradient(180deg, #fffdf9 0%, #fff3df 100%);
+  border-top: 2px solid var(--color-border);
+  background: linear-gradient(135deg, #fff8ef 0%, #fdeecf 50%, #fae3b0 100%);
 }
 
 .app-footer-inner {
   width: min(100%, 1200px);
   margin: 0 auto;
-  padding: 1.25rem 1rem;
-  display: grid;
-  gap: 0.35rem;
+  padding: 1.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-brand-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .footer-brand {
-  font-size: 1.1rem;
+  display: block;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-accent-dark);
 }
 
+.footer-tagline {
+  font-size: 0.8rem;
+  color: var(--color-text-soft);
+  margin-top: 0.1rem;
+}
+
 .footer-copy {
+  font-size: 0.8rem;
   color: var(--color-text-soft);
 }
 

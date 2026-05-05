@@ -1,189 +1,118 @@
 <template>
-  <section class="reservations-view">
-    <div class="section-head">
-      <span class="section-kicker">Reservations</span>
-      <h1>Mes reservations</h1>
-      <p>Consulte tes reservations et leur statut.</p>
-    </div>
+  <section class="max-w-6xl mx-auto space-y-6">
 
-    <div class="filter-row">
-      <button
-        type="button"
-        class="filter-button"
-        :class="{ 'filter-active': activeFilter === 'all' }"
-        @click="activeFilter = 'all'"
-      >
-        Toutes
-      </button>
-      <button
-        type="button"
-        class="filter-button"
-        :class="{ 'filter-active': activeFilter === 'pending' }"
-        @click="activeFilter = 'pending'"
-      >
-        En attente
-      </button>
-      <button
-        type="button"
-        class="filter-button"
-        :class="{ 'filter-active': activeFilter === 'confirmed' }"
-        @click="activeFilter = 'confirmed'"
-      >
-        Confirmees
-      </button>
-      <button
-        type="button"
-        class="filter-button"
-        :class="{ 'filter-active': activeFilter === 'cancelled' }"
-        @click="activeFilter = 'cancelled'"
-      >
-        Annulees
-      </button>
-    </div>
+    <select v-model="filter" class="border p-2 rounded mb-4">
+      <option value="all">Toutes</option>
+      <option value="pending">En attente</option>
+      <option value="confirmed">Confirmées</option>
+      <option value="cancelled">Annulées</option>
+    </select>
 
-    <AlertMessage v-if="success" type="success" :message="success" @close="success = ''" />
+    <table class="w-full bg-white rounded shadow overflow-hidden">
 
-    <AlertMessage
-      v-if="reservationsStore.error"
-      type="error"
-      :message="reservationsStore.error"
-      @close="reservationsStore.error = ''"
-    />
+      <thead class="bg-orange-100">
+        <tr class="text-left">
+          <th class="p-2">Emplacement</th>
+          <th class="p-2">Arrivée</th>
+          <th class="p-2">Départ</th>
+          <th class="p-2">Pers.</th>
+          <th class="p-2">Total</th>
+          <th class="p-2">Statut</th>
+          <th class="p-2">Actions</th>
+        </tr>
+      </thead>
 
-    <p v-if="reservationsStore.loading" class="status-text">Chargement des reservations...</p>
+      <tbody>
 
-    <div v-else-if="filteredReservations.length" class="reservations-table">
-      <div class="table-head">
-        <span>Emplacement</span>
-        <span>Arrivee</span>
-        <span>Depart</span>
-        <span>Personnes</span>
-        <span>Total</span>
-        <span>Statut</span>
-        <span>Actions</span>
-      </div>
+        <tr v-for="r in filtered" :key="r.id" class="border-t">
 
-      <article v-for="item in filteredReservations" :key="item._id" class="table-row">
-        <span>{{ getCampsiteName(item) }}</span>
-        <span>{{ formatDate(item.startDate) }}</span>
-        <span>{{ formatDate(item.endDate) }}</span>
-        <span>{{ item.guests }}</span>
-        <span>{{ item.totalPrice }} $</span>
-        <span>
-          <strong class="status-badge" :class="getStatusClass(item.status)">
-            {{ getStatusLabel(item.status) }}
-          </strong>
-        </span>
-        <span>
-          <RouterLink
-            :to="{ name: 'reservation-detail', params: { id: item._id } }"
-            class="detail-link"
-          >
-            Voir details
-          </RouterLink>
-          <button
-            v-if="item.status === 'pending'"
-            type="button"
-            class="cancel-link"
-            @click="cancelReservation(item)"
-          >
-            Annuler
-          </button>
-        </span>
-      </article>
-    </div>
+          <td class="p-2">{{ r.campsite?.name || r.campsiteName || '—' }}</td>
+          <td class="p-2">{{ r.startDate?.slice(0, 10) }}</td>
+          <td class="p-2">{{ r.endDate?.slice(0, 10) }}</td>
+          <td class="p-2">{{ r.guests }}</td>
+          <td class="p-2">{{ r.totalPrice ?? r.total ?? '—' }}$</td>
 
-    <div v-else class="empty-state">
-      <h2>Aucune reservation</h2>
-      <p>Tu n'as pas encore de reservation pour ce filtre.</p>
-      <button type="button" class="primary-button" @click="goToCampsites">
-        Voir les emplacements
-      </button>
-    </div>
+          <td class="p-2">
+            <span
+              v-if="r.status === 'pending'"
+              class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs"
+            >
+              En attente
+            </span>
+            <span
+              v-else-if="r.status === 'confirmed'"
+              class="bg-green-200 text-green-800 px-2 py-1 rounded text-xs"
+            >
+              Confirmée
+            </span>
+            <span
+              v-else-if="r.status === 'cancelled'"
+              class="bg-red-200 text-red-800 px-2 py-1 rounded text-xs"
+            >
+              Annulée
+            </span>
+          </td>
+
+          <td class="p-2 flex gap-2 flex-wrap">
+            <RouterLink
+              :to="{ name: 'reservation-detail', params: { id: r._id } }"
+              class="bg-orange-500 text-white px-2 py-1 rounded text-xs inline-flex items-center gap-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+              </svg>
+            </RouterLink>
+
+            <button
+              v-if="r.status === 'pending'"
+              @click="cancelReservation(r._id)"
+              class="bg-red-500 text-white px-2 py-1 rounded text-xs inline-flex items-center gap-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+    <p v-if="!filtered.length" class="text-center text-slate-500">
+      Aucune réservation
+    </p>
+
   </section>
 </template>
-
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import AlertMessage from '@/components/AlertMessage.vue'
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useReservationsStore } from '@/stores/reservations'
 
-const router = useRouter()
 const reservationsStore = useReservationsStore()
-const activeFilter = ref('all')
-const success = ref('')
 
-const filteredReservations = computed(() => {
-  if (activeFilter.value === 'all') {
-    return reservationsStore.reservations
-  }
+const filter = ref('all')
 
-  return reservationsStore.reservations.filter((item) => item.status === activeFilter.value)
+onMounted(() => {
+  reservationsStore.fetchReservations()
 })
 
-function formatDate(value) {
-  if (!value) return ''
-
-  return new Date(value).toLocaleDateString('fr-CA')
-}
-
-function getStatusLabel(status) {
-  if (status === 'pending') return 'En attente'
-  if (status === 'confirmed') return 'Confirmee'
-  if (status === 'cancelled') return 'Annulee'
-  return status
-}
-
-function getStatusClass(status) {
-  if (status === 'pending') return 'status-pending'
-  if (status === 'confirmed') return 'status-confirmed'
-  if (status === 'cancelled') return 'status-cancelled'
-  return ''
-}
-
-function getCampsiteName(item) {
-  if (typeof item.campsite === 'object' && item.campsite?.name) {
-    return item.campsite.name
-  }
-
-  return 'Emplacement'
-}
-
-async function loadReservations() {
-  try {
-    await reservationsStore.fetchReservations(
-      activeFilter.value === 'all' ? {} : { status: activeFilter.value },
-    )
-  } catch {
-    // je gère l'erreur est déjà gérée dans le store (reservationsStore.error)
-  }
-}
-
-async function cancelReservation(item) {
-  success.value = ''
-
-  try {
-    await reservationsStore.updateReservationStatus(item._id, 'cancelled')
-    success.value = 'Reservation annulee avec succes.'
-    await loadReservations()
-  } catch {
-    // je gère l'erreur est déjà gérée dans le store (reservationsStore.error)
-  }
-}
-
-function goToCampsites() {
-  router.push({ name: 'campsites' })
-}
-
-onMounted(async () => {
-  await loadReservations()
+const filtered = computed(() => {
+  if (filter.value === 'all') return reservationsStore.reservations
+  return reservationsStore.reservations.filter(r => r.status === filter.value)
 })
 
-watch(activeFilter, async () => {
-  await loadReservations()
-})
+function cancelReservation(id) {
+  reservationsStore.cancelReservation(id)
+}
 </script>
+
+
+
+
 <style scoped>
 .reservations-view {
   display: grid;

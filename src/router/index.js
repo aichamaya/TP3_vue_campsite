@@ -68,7 +68,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
-  auth.syncExpiredToken()
+  auth.initialize()
 
   if ((to.name === 'login' || to.name === 'register') && auth.isAuthenticated) {
     return { name: 'home' }

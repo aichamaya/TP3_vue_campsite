@@ -1,101 +1,67 @@
 <template>
-  <div class="home-view">
-    <section class="hero">
-      <img src="/hero.png" alt="CampXplore" class="hero-image" />
-    </section>
+  <section class="space-y-6 max-w-5xl mx-auto">
+    <div class="relative rounded-2xl overflow-hidden shadow">
+      <img src="/hero.png" class="w-full h-[420px] object-cover object-center" />
 
-    <section class="search-section">
-      <div class="section-head">
-        <span class="section-kicker">Accueil</span>
-        <h1>Recherche de disponibilite</h1>
-        <p>
-          Choisis tes dates, le nombre de personnes et un type pour verifier les emplacements
-          disponibles.
-        </p>
-      </div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
 
-      <AlertMessage v-if="localError" type="error" :message="localError" @close="localError = ''" />
-
-      <form class="search-form" novalidate @submit.prevent="handleSearch">
-        <label class="field-group">
-          <span>Date d'arrivee</span>
-          <input v-model="form.startDate" type="date" />
-          <small v-if="errors.startDate" class="field-error">{{ errors.startDate }}</small>
-        </label>
-
-        <label class="field-group">
-          <span>Date de depart</span>
-          <input v-model="form.endDate" type="date" />
-          <small v-if="errors.endDate" class="field-error">{{ errors.endDate }}</small>
-        </label>
-
-        <label class="field-group">
-          <span>Nombre de personnes</span>
-          <input v-model.number="form.guests" type="number" />
-        </label>
-
-        <label class="field-group">
-          <span>Type</span>
-          <select v-model="form.type">
-            <option value="">Tous les types</option>
-            <option value="tente">Tente</option>
-            <option value="rv">VR</option>
-            <option value="chalet">Chalet</option>
-            <option value="glamping">Glamping</option>
-            <option value="arrière-pays">Arriere-pays</option>
-            <option value="autre">Autre</option>
-          </select>
-        </label>
-
-        <button type="submit" class="primary-button" :disabled="campsitesStore.loading">
-          {{ campsitesStore.loading ? 'Recherche...' : 'Rechercher' }}
+      <div class="absolute bottom-6 left-6">
+        <button
+          @click="router.push({ name: 'campsites' })"
+          class="bg-orange-500 hover:bg-orange-600 transition-colors text-white font-semibold px-8 py-3 rounded-full shadow-lg"
+        >
+          Voir les emplacements
         </button>
-      </form>
-    </section>
+      </div>
+    </div>
 
-    <section v-if="hasSearched" class="results-section">
-      <div class="results-head">
-        <div>
-          <h2>
-            {{ campsitesStore.campsites.length }} emplacement{{
-              campsitesStore.campsites.length > 1 ? 's' : ''
-            }}
-            trouve{{ campsitesStore.campsites.length > 1 ? 's' : '' }}
-          </h2>
-          <p v-if="campsitesStore.campsites.length">Voici un apercu des disponibilites trouvees.</p>
-          <p v-else>Aucun emplacement disponible pour les criteres choisis.</p>
+    <div class="bg-white p-4 rounded-xl shadow">
+      <form @submit.prevent="handleSearch" novalidate class="flex flex-col md:flex-row gap-3 items-start">
+        <div class="w-full">
+          <input v-model="form.startDate" type="date" class="border p-2 rounded w-full" />
+          <small v-if="errors.startDate" class="text-red-600 text-xs">{{ errors.startDate }}</small>
         </div>
 
-        <button
-          v-if="campsitesStore.campsites.length"
-          type="button"
-          class="secondary-button"
-          @click="openResultsPage"
-        >
-          Voir la liste complete
+        <div class="w-full">
+          <input v-model="form.endDate" type="date" class="border p-2 rounded w-full" />
+          <small v-if="errors.endDate" class="text-red-600 text-xs">{{ errors.endDate }}</small>
+        </div>
+
+        <input v-model="form.guests" type="number" min="1" class="border p-2 rounded w-full" />
+
+        <select v-model="form.type" class="border p-2 rounded w-full">
+          <option value="">Tous</option>
+          <option value="tente">Tente</option>
+          <option value="vr">VR</option>
+          <option value="chalet">Chalet</option>
+          <option value="glamping">Glamping</option>
+          <option value="arrière-pays">Arrière-pays</option>
+        </select>
+
+        <button class="bg-orange-500 text-white px-4 py-2 rounded w-full md:w-auto whitespace-nowrap">
+          Rechercher
         </button>
+      </form>
+    </div>
+
+    <div v-if="searched">
+      <p class="font-semibold mb-3">{{ results.length }} emplacement(s) disponible(s)</p>
+
+      <div v-if="results.length" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CampsiteCard v-for="c in results" :key="c._id" :campsite="c" />
       </div>
 
-      <div v-if="previewCampsites.length" class="results-grid">
-        <CampsiteCard v-for="item in previewCampsites" :key="item._id" :campsite="item" />
-      </div>
-    </section>
-
-    <section v-else class="home-note">
-      <h2>Commence par une recherche</h2>
-      <p>La liste des emplacements disponibles apparaitra ici apres avoir choisi tes criteres.</p>
-      <RouterLink :to="{ name: 'campsites' }" class="secondary-button"
-        >Voir tous les emplacements</RouterLink
-      >
-    </section>
-  </div>
+      <p v-else class="bg-orange-100 text-orange-700 p-3 rounded">
+        Aucun emplacement disponible pour ces critères.
+      </p>
+    </div>
+  </section>
 </template>
 <script setup>
-import { computed, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import AlertMessage from '@/components/AlertMessage.vue'
-import CampsiteCard from '@/components/CampsiteCard.vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCampsitesStore } from '@/stores/campsites'
+import CampsiteCard from '@/components/CampsiteCard.vue'
 
 const router = useRouter()
 const campsitesStore = useCampsitesStore()
@@ -107,60 +73,37 @@ const form = ref({
   type: '',
 })
 
-const hasSearched = ref(false)
-const localError = ref('')
+const results = computed(() => campsitesStore.campsites)
 const errors = ref({})
-
-const previewCampsites = computed(() => campsitesStore.campsites.slice(0, 6))
+const searched = ref(false)
 
 async function handleSearch() {
-  localError.value = ''
   errors.value = {}
 
-  if (!form.value.startDate || !form.value.endDate) {
-    if (!form.value.startDate) errors.value.startDate = "La date d'arrivee est requise."
-    if (!form.value.endDate) errors.value.endDate = 'La date de depart est requise.'
+  const today = new Date().toISOString().slice(0, 10)
+
+  if (!form.value.startDate) {
+    errors.value.startDate = "La date d'arrivée est requise."
+  } else if (form.value.startDate < today) {
+    errors.value.startDate = "La date d'arrivée ne peut pas être dans le passé."
   }
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const start = form.value.startDate ? new Date(form.value.startDate) : null
-  const end = form.value.endDate ? new Date(form.value.endDate) : null
-
-  if (start && start < today)
-    errors.value.startDate = "La date d'arrivee ne peut pas etre dans le passe."
-  if (start && end && end <= start)
-    errors.value.endDate = "La date de depart doit etre apres la date d'arrivee."
-
-  if (Object.keys(errors.value).length) {
-    localError.value = 'Corrige les champs en erreur.'
-    return
+  if (!form.value.endDate) {
+    errors.value.endDate = 'La date de départ est requise.'
+  } else if (form.value.endDate <= form.value.startDate) {
+    errors.value.endDate = "La date de départ doit être après la date d'arrivée."
   }
 
-  hasSearched.value = true
+  if (Object.keys(errors.value).length) return
 
-  try {
-    await campsitesStore.fetchAvailableCampsites({
-      startDate: form.value.startDate,
-      endDate: form.value.endDate,
-      guests: form.value.guests,
-      type: form.value.type || undefined,
-    })
-  } catch {
-    localError.value = campsitesStore.error
-  }
-}
-
-function openResultsPage() {
-  router.push({
-    name: 'campsites',
-    query: {
-      startDate: form.value.startDate,
-      endDate: form.value.endDate,
-      guests: form.value.guests,
-      type: form.value.type || undefined,
-    },
+  await campsitesStore.fetchAvailableCampsites({
+    startDate: form.value.startDate,
+    endDate: form.value.endDate,
+    guests: form.value.guests,
+    type: form.value.type || undefined,
   })
+
+  searched.value = true
 }
 </script>
 <style scoped>

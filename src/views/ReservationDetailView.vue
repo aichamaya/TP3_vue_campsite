@@ -50,14 +50,6 @@
           <p><strong>Total :</strong> {{ reservation.totalPrice }} $</p>
         </div>
 
-        <div v-if="campsite" class="detail-links">
-          <RouterLink
-            :to="{ name: 'campsite-detail', params: { id: campsite._id } }"
-            class="detail-link"
-          >
-            Voir l'emplacement
-          </RouterLink>
-        </div>
 
         <div v-if="!hasInvoice" class="action-row">
           <button

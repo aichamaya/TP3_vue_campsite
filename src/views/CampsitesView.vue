@@ -1,289 +1,134 @@
 <template>
-  <div class="campsites-view">
-    <section class="filters-section">
-      <div class="section-head">
-        <span class="section-kicker">Emplacements</span>
-        <h1>Liste des emplacements</h1>
-        <p>
-          Filtre par type et consulte les disponibilites si tu arrives depuis la recherche de
-          l'accueil.
-        </p>
+  <section class="max-w-5xl mx-auto space-y-6">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Emplacements</h1>
       </div>
+      <span class="count-badge"
+        >{{ campsitesStore.campsites.length }} emplacement(s) trouvé(s)</span
+      >
+    </div>
 
-      <div class="filters-grid">
-        <label class="field-group">
-          <span>Type</span>
-          <select v-model="filters.type">
-            <option value="">Tous les types</option>
-            <option value="tente">Tente</option>
-            <option value="rv">VR</option>
-            <option value="chalet">Chalet</option>
-            <option value="glamping">Glamping</option>
-            <option value="arrière-pays">Arriere-pays</option>
-            <option value="autre">Autre</option>
-          </select>
-        </label>
+    <div class="filter-bar">
+      <select v-model="type" @change="load" class="filter-select">
+        <option value="">Tous les types</option>
+        <option value="tente">Tente</option>
+        <option value="vr">VR</option>
+        <option value="chalet">Chalet</option>
+        <option value="glamping">Glamping</option>
+        <option value="arrière-pays">Arrière-pays</option>
+        <option value="autre">Autre</option>
+      </select>
 
-        <label class="field-group">
-          <span>Date de depart</span>
-          <input v-model="filters.startDate" type="date" :disabled="!hasAvailabilitySearch" />
-        </label>
+      <button @click="resetFilter" class="reset-btn">Réinitialiser</button>
+    </div>
 
-        <label class="field-group">
-          <span>Date de fin</span>
-          <input v-model="filters.endDate" type="date" :disabled="!hasAvailabilitySearch" />
-        </label>
+    <div v-if="campsitesStore.campsites.length" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <CampsiteCard v-for="c in campsitesStore.campsites" :key="c._id" :campsite="c" />
+    </div>
 
-        <label class="field-group">
-          <span>Personnes</span>
-          <input
-            v-model.number="filters.guests"
-            type="number"
-            min="1"
-            :disabled="!hasAvailabilitySearch"
-          />
-        </label>
-
-        <button type="button" class="secondary-button" @click="resetFilters">Reinitialiser</button>
-      </div>
-    </section>
-
-    <section class="results-section">
-      <div class="results-head">
-        <p>
-          <strong>{{ campsitesStore.campsites.length }}</strong>
-          emplacement{{ campsitesStore.campsites.length > 1 ? 's' : '' }} affiche{{
-            campsitesStore.campsites.length > 1 ? 's' : ''
-          }}
-        </p>
-      </div>
-
-      <AlertMessage
-        v-if="campsitesStore.error"
-        type="error"
-        :message="campsitesStore.error"
-        @close="campsitesStore.error = ''"
-      />
-
-      <p v-if="campsitesStore.loading" class="status-text">Chargement des emplacements...</p>
-
-      <div v-else-if="campsitesStore.campsites.length" class="results-grid">
-        <CampsiteCard v-for="item in campsitesStore.campsites" :key="item._id" :campsite="item" />
-      </div>
-
-      <div v-else class="empty-state">
-        <h2>Aucun emplacement trouve</h2>
-        <p>Essaie un autre type ou retire les filtres pour afficher davantage de resultats.</p>
-      </div>
-    </section>
-  </div>
+    <div v-else class="empty-state">
+      <p>Aucun emplacement trouvé pour ce filtre.</p>
+    </div>
+  </section>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import AlertMessage from '@/components/AlertMessage.vue'
-import CampsiteCard from '@/components/CampsiteCard.vue'
+import { ref, onMounted } from 'vue'
 import { useCampsitesStore } from '@/stores/campsites'
+import CampsiteCard from '@/components/CampsiteCard.vue'
 
-const route = useRoute()
-const router = useRouter()
 const campsitesStore = useCampsitesStore()
+const type = ref('')
 
-const filters = ref({
-  type: '',
-  startDate: '',
-  endDate: '',
-  guests: 1,
-})
+onMounted(() => load())
 
-const hasAvailabilitySearch = computed(() => !!filters.value.startDate && !!filters.value.endDate)
-
-function syncFiltersFromRoute() {
-  filters.value = {
-    type: typeof route.query.type === 'string' ? route.query.type : '',
-    startDate: typeof route.query.startDate === 'string' ? route.query.startDate : '',
-    endDate: typeof route.query.endDate === 'string' ? route.query.endDate : '',
-    guests: Number(route.query.guests) > 0 ? Number(route.query.guests) : 1,
-  }
+function load() {
+  campsitesStore.fetchCampsites({ type: type.value || undefined })
 }
 
-async function loadCampsites() {
-  if (hasAvailabilitySearch.value) {
-    await campsitesStore.fetchAvailableCampsites({
-      startDate: filters.value.startDate,
-      endDate: filters.value.endDate,
-      guests: filters.value.guests,
-      type: filters.value.type || undefined,
-    })
-    return
-  }
-
-  await campsitesStore.fetchCampsites({
-    type: filters.value.type || undefined,
-  })
+function resetFilter() {
+  type.value = ''
+  load()
 }
-
-function updateRouteQuery() {
-  router.replace({
-    name: 'campsites',
-    query: {
-      type: filters.value.type || undefined,
-      startDate: filters.value.startDate || undefined,
-      endDate: filters.value.endDate || undefined,
-      guests: hasAvailabilitySearch.value ? filters.value.guests : undefined,
-    },
-  })
-}
-
-function resetFilters() {
-  filters.value = {
-    type: '',
-    startDate: '',
-    endDate: '',
-    guests: 1,
-  }
-  updateRouteQuery()
-}
-
-onMounted(async () => {
-  syncFiltersFromRoute()
-  await loadCampsites()
-})
-
-watch(
-  () => route.query,
-  async () => {
-    syncFiltersFromRoute()
-    await loadCampsites()
-  },
-)
-
-watch(
-  () => filters.value.type,
-  () => {
-    updateRouteQuery()
-  },
-)
 </script>
+
 <style scoped>
-.campsites-view {
-  display: grid;
-  gap: 1.5rem;
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.filters-section,
-.results-section {
-  padding: 1.5rem;
-  border-radius: 1.5rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
 }
 
-.section-kicker {
-  display: inline-flex;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+.page-sub {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--color-text-soft);
+}
+
+.count-badge {
   background: var(--color-accent-soft);
   color: var(--color-accent-dark);
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.section-head h1 {
-  margin-top: 0.75rem;
-  color: var(--color-text);
-}
-
-.section-head p {
-  margin-top: 0.5rem;
-  color: var(--color-text-soft);
-}
-
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.field-group {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.field-group span {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.field-group input,
-.field-group select {
-  min-height: 3rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.9rem;
-  background: #fffdf9;
-}
-
-.field-group input:disabled {
-  background: #f6ead8;
-  color: #7b8794;
-}
-
-.secondary-button {
-  min-height: 3rem;
-  align-self: end;
-  padding: 0.8rem 1rem;
-  border: none;
+  padding: 0.4rem 1rem;
   border-radius: 999px;
-  background: var(--color-accent-soft);
-  color: var(--color-accent-dark);
-  font-weight: 700;
+  white-space: nowrap;
 }
 
-.results-head {
-  margin-bottom: 1rem;
-  color: var(--color-text-soft);
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.results-head strong {
+.filter-select {
+  padding: 0.55rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 0.6rem;
+  background: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
   color: var(--color-text);
+  cursor: pointer;
+  min-width: 180px;
 }
 
-.results-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+.filter-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
 }
 
-.status-text,
-.empty-state {
+.reset-btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.6rem;
+  border: 1.5px solid var(--color-border);
+  background: #fff;
+  font-weight: 600;
+  font-size: 0.88rem;
   color: var(--color-text-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reset-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent-dark);
 }
 
 .empty-state {
-  padding: 1rem 0;
-}
-
-.empty-state h2 {
-  color: var(--color-text);
-}
-
-@media (max-width: 1000px) {
-  .filters-grid,
-  .results-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 700px) {
-  .filters-section,
-  .results-section {
-    padding: 1.2rem;
-  }
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-soft);
+  font-size: 1rem;
 }
 </style>

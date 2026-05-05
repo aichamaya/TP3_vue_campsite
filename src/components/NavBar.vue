@@ -25,10 +25,11 @@
           >
           <template v-if="auth.isAuthenticated">
             <RouterLink
+              v-if="!auth.isAdmin"
               :to="{ name: 'reservations' }"
               class="nav-link"
               :class="{ 'nav-link-active': reservationsActive }"
-              >Mes reservations</RouterLink
+              >Mes réservations</RouterLink
             >
             <RouterLink
               :to="{ name: 'profile' }"
@@ -43,12 +44,11 @@
                   >Emplacements</RouterLink
                 >
                 <RouterLink :to="{ name: 'admin-reservations' }" class="admin-link"
-                  >Reservations</RouterLink
+                  >Réservations</RouterLink
                 >
-                <RouterLink :to="{ name: 'admin-invoices' }" class="admin-link"
+                <!--RouterLink :to="{ name: 'admin-invoices' }" class="admin-link"
                   >Factures</RouterLink
-                >
-              </div>
+              --></div>
             </div>
           </template>
         </div>
@@ -57,7 +57,7 @@
       <div class="navbar-actions desktop-only">
         <template v-if="auth.isAuthenticated">
           <button @click="handleLogout" class="nav-link nav-button" type="button">
-            Deconnexion
+            Déconnexion
           </button>
         </template>
         <template v-else>
@@ -96,6 +96,7 @@
 
       <template v-if="auth.isAuthenticated">
         <RouterLink
+          v-if="!auth.isAdmin"
           @click="mobileOpen = false"
           :to="{ name: 'reservations' }"
           class="mobile-link"
@@ -261,7 +262,7 @@ function handleLogout() {
 
 .nav-link-primary {
   background: var(--color-accent);
-  color: #ffffff;
+  color: #000000;
 }
 
 .nav-link-primary:hover {

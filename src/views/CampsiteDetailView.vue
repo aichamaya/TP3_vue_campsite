@@ -1,238 +1,217 @@
 <template>
-  <div class="detail-view">
-    <RouterLink :to="{ name: 'campsites' }" class="back-link"> Retour aux emplacements </RouterLink>
+  <section class="max-w-5xl mx-auto space-y-6">
 
-    <p v-if="campsitesStore.loading && !campsite" class="status-text">
-      Chargement de l'emplacement...
-    </p>
+    
+    <div v-if="campsite" class="bg-white p-6 rounded-xl shadow space-y-3">
 
-    <AlertMessage
-      v-if="localError && !campsite"
-      type="error"
-      :message="localError"
-      @close="localError = ''"
-    />
+      <h1 class="text-2xl font-bold">
+        {{ campsite.name }}
+      </h1>
 
-    <section v-if="campsite" class="detail-shell">
-      <div class="detail-main">
-        <section class="detail-card">
-          <span class="section-kicker">{{ typeLabel }}</span>
-          <h1>{{ campsite.name }}</h1>
-          <p class="detail-location">{{ campsite.location }}</p>
-          <p class="detail-description">{{ campsite.description }}</p>
+      <p class="text-slate-600">
+        {{ campsite.description }}
+      </p>
 
-          <div class="detail-meta">
-            <div class="meta-box">
-              <strong>{{ campsite.pricePerNight }} $</strong>
-              <span>par nuit</span>
-            </div>
+      <p>📍 {{ campsite.location }}</p>
+      <p>👥 {{ campsite.capacity }} personnes</p>
 
-            <div class="meta-box">
-              <strong>{{ campsite.capacity }}</strong>
-              <span>personnes max</span>
-            </div>
+      <p v-if="campsite.maxVehicleLength">
+        🚐 {{ campsite.maxVehicleLength }} m
+      </p>
 
-            <div v-if="campsite.maxVehicleLength" class="meta-box">
-              <strong>{{ campsite.maxVehicleLength }} m</strong>
-              <span>longueur max</span>
-            </div>
-          </div>
-        </section>
+      <p class="text-orange-500 font-bold">
+        {{ campsite.pricePerNight }}$ / nuit
+      </p>
 
-        <section class="detail-card">
-          <h2>Equipements</h2>
-          <div class="amenities-list">
-            <span v-for="item in campsite.amenities" :key="item" class="amenity-chip">
-              {{ item }}
-            </span>
-          </div>
-        </section>
+    </div>
+
+  
+    <div class="bg-white p-6 rounded-xl shadow space-y-4">
+
+      <h2 class="font-semibold text-lg">
+        Réserver
+      </h2>
+
+      <div v-if="!authStore.isAuthenticated" class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center space-y-2">
+        <p class="text-orange-700">Vous devez être connecté pour réserver.</p>
+        <button
+          @click="router.push({ name: 'login', query: { redirect: route.fullPath } })"
+          class="bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-semibold"
+        >
+          Se connecter
+        </button>
       </div>
 
-      <aside class="booking-card">
-        <h2>Formulaire de reservation</h2>
-        <p>Choisis les dates et le nombre de personnes pour calculer le total.</p>
+      <div v-else-if="authStore.isAdmin" class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center">
+        <p class="text-slate-500 text-sm">Les administrateurs ne peuvent pas effectuer de réservation.</p>
+      </div>
 
-        <AlertMessage v-if="success" type="success" :message="success" @close="success = ''" />
-        <AlertMessage
-          v-if="localError && campsite"
-          type="error"
-          :message="localError"
-          @close="localError = ''"
+      <form v-else @submit.prevent="handleReserve" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+        <input v-model="form.startDate" type="date" class="border p-2 rounded" />
+
+        <input v-model="form.endDate" type="date" class="border p-2 rounded" />
+
+        <div class="flex flex-col gap-1">
+          <input
+            v-model.number="form.guests"
+            type="number"
+            min="1"
+            :max="campsite?.capacity"
+            :placeholder="`Nb. personnes`"
+            class="border p-2 rounded"
+          />
+          <small v-if="campsite?.capacity" class="text-slate-400 text-xs">
+            Entre 1 et {{ campsite.capacity }} personne(s)
+          </small>
+        </div>
+
+        <input
+          v-if="campsite?.type === 'vr'"
+          v-model.number="form.vehicleLength"
+          type="number"
+          min="1"
+          :max="campsite?.maxVehicleLength"
+          placeholder="Longueur véhicule (m)"
+          class="border p-2 rounded col-span-full md:col-span-1"
         />
 
-        <form class="booking-form" novalidate @submit.prevent="handleReservation">
-          <label class="field-group">
-            <span>Date d'arrivee</span>
-            <input v-model="form.startDate" type="date" />
-            <small v-if="errors.startDate" class="field-error">{{ errors.startDate }}</small>
-          </label>
+        <button
+          :disabled="loading"
+          class="bg-orange-500 text-white rounded col-span-full py-2 disabled:opacity-50"
+        >
+          {{ loading ? 'Réservation en cours...' : 'Réserver' }}
+        </button>
 
-          <label class="field-group">
-            <span>Date de depart</span>
-            <input v-model="form.endDate" type="date" />
-            <small v-if="errors.endDate" class="field-error">{{ errors.endDate }}</small>
-          </label>
+      </form>
 
-          <label class="field-group">
-            <span>Nombre de personnes</span>
-            <input v-model.number="form.guests" type="number" :max="campsite.capacity" />
-            <small v-if="errors.guests" class="field-error">{{ errors.guests }}</small>
-          </label>
+      <p>
+        Nuits : {{ nights }}
+      </p>
 
-          <label v-if="campsite.type === 'rv'" class="field-group">
-            <span>Longueur du vehicule</span>
-            <input v-model="form.vehicleLength" type="number" step="0.1" />
-            <small v-if="errors.vehicleLength" class="field-error">
-              {{ errors.vehicleLength }}
-            </small>
-          </label>
+      <p class="font-bold text-orange-500">
+        Total : {{ total }}$
+      </p>
 
-          <div class="summary-box">
-            <p>
-              {{ numberOfNights }} nuit{{ numberOfNights > 1 ? 's' : '' }} x
-              {{ campsite.pricePerNight }} $
-            </p>
-            <strong>Total : {{ totalPrice }} $</strong>
-          </div>
+      <p v-if="error" class="text-red-500">
+        {{ error }}
+      </p>
 
-          <button type="submit" class="primary-button" :disabled="reservationsStore.loading">
-            {{ reservationsStore.loading ? 'Reservation...' : 'Confirmer la reservation' }}
-          </button>
-        </form>
-      </aside>
-    </section>
-  </div>
+      <p v-if="success" class="text-green-500">
+        {{ success }}
+      </p>
+
+    </div>
+
+  </section>
 </template>
-
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
-import AlertMessage from '@/components/AlertMessage.vue'
-import { useAuthStore } from '@/stores/auth'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useCampsitesStore } from '@/stores/campsites'
 import { useReservationsStore } from '@/stores/reservations'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
-const auth = useAuthStore()
 const campsitesStore = useCampsitesStore()
 const reservationsStore = useReservationsStore()
+const authStore = useAuthStore()
+
+const campsite = ref(null)
+
+const today = new Date().toISOString().slice(0, 10)
+const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10)
 
 const form = ref({
-  startDate: '',
-  endDate: '',
+  startDate: today,
+  endDate: tomorrow,
   guests: 1,
-  vehicleLength: '',
+  vehicleLength: null
 })
 
+const error = ref('')
 const success = ref('')
-const localError = ref('')
-const errors = ref({})
+const loading = ref(false)
 
-const campsite = computed(() => campsitesStore.campsite)
-
-const typeLabel = computed(() => {
-  if (!campsite.value) return ''
-  if (campsite.value.type === 'tente') return 'Tente'
-  if (campsite.value.type === 'rv') return 'VR'
-  if (campsite.value.type === 'chalet') return 'Chalet'
-  if (campsite.value.type === 'glamping') return 'Glamping'
-  if (campsite.value.type === 'arrière-pays' || campsite.value.type === 'arriere-pays')
-    return 'Arriere-pays'
-  return 'Autre'
+onMounted(async () => {
+  await campsitesStore.fetchCampsiteById(route.params.id)
+  campsite.value = campsitesStore.currentCampsite
 })
 
-const numberOfNights = computed(() => {
+const nights = computed(() => {
   if (!form.value.startDate || !form.value.endDate) return 0
-
   const start = new Date(form.value.startDate)
   const end = new Date(form.value.endDate)
-  const difference = (end - start) / (1000 * 60 * 60 * 24)
-
-  return difference > 0 ? difference : 0
+  const diff = (end - start) / (1000 * 60 * 60 * 24)
+  return diff > 0 ? diff : 0
 })
 
-const totalPrice = computed(() => {
-  if (!campsite.value) return 0
-  return numberOfNights.value * campsite.value.pricePerNight
+const total = computed(() => {
+  if (!campsite.value || nights.value === 0) return 0
+  return nights.value * campsite.value.pricePerNight
 })
 
-function getErrorMessage(err) {
-  return err?.data?.message || err?.message || 'Erreur lors de la reservation.'
-}
-
-async function handleReservation() {
-  localError.value = ''
+async function handleReserve() {
+  error.value = ''
   success.value = ''
-  errors.value = {}
 
-  if (!auth.isAuthenticated) {
+  if (!authStore.isAuthenticated) {
     router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const start = form.value.startDate ? new Date(form.value.startDate) : null
-  const end = form.value.endDate ? new Date(form.value.endDate) : null
-
-  if (!form.value.startDate) {
-    errors.value.startDate = "La date d'arrivee est requise."
-  } else if (start < today) {
-    errors.value.startDate = "La date d'arrivee ne peut pas etre dans le passe."
+  if (!form.value.startDate || !form.value.endDate) {
+    error.value = 'Les dates sont requises.'
+    return
   }
-
-  if (!form.value.endDate) {
-    errors.value.endDate = 'La date de depart est requise.'
-  } else if (start && end <= start) {
-    errors.value.endDate = "La date de depart doit etre apres la date d'arrivee."
+  if (form.value.startDate < today) {
+    error.value = "La date d'arrivée ne peut pas être dans le passé."
+    return
   }
-
-  if (form.value.guests < 1 || form.value.guests > campsite.value.capacity) {
-    errors.value.guests = `Le nombre de personnes doit etre entre 1 et ${campsite.value.capacity}.`
+  if (form.value.endDate <= form.value.startDate) {
+    error.value = "La date de départ doit être après la date d'arrivée."
+    return
   }
-
-  if (campsite.value.type === 'rv' && !form.value.vehicleLength) {
-    errors.value.vehicleLength = 'La longueur du vehicule est obligatoire pour un emplacement VR.'
-  } else if (
-    campsite.value.type === 'rv' &&
-    Number(form.value.vehicleLength) > Number(campsite.value.maxVehicleLength)
-  ) {
-    errors.value.vehicleLength = `La longueur doit etre au maximum ${campsite.value.maxVehicleLength} m.`
+  if (!form.value.guests || form.value.guests < 1) {
+    error.value = 'Le nombre de personnes doit être au moins 1.'
+    return
   }
-
-  if (Object.keys(errors.value).length) {
-    localError.value = 'Corrige les champs en erreur.'
+  if (campsite.value && form.value.guests > campsite.value.capacity) {
+    error.value = `Cet emplacement accepte maximum ${campsite.value.capacity} personne(s).`
+    return
+  }
+  if (campsite.value?.type === 'vr' && !form.value.vehicleLength) {
+    error.value = 'La longueur du véhicule est requise pour les emplacements VR.'
+    return
+  }
+  if (campsite.value?.maxVehicleLength && form.value.vehicleLength > campsite.value.maxVehicleLength) {
+    error.value = `La longueur maximale acceptée est ${campsite.value.maxVehicleLength} m.`
     return
   }
 
+  loading.value = true
   try {
-    await reservationsStore.createReservation({
+    const payload = {
       campsite: campsite.value._id,
       startDate: form.value.startDate,
       endDate: form.value.endDate,
-      guests: form.value.guests,
-      vehicleLength: campsite.value.type === 'rv' ? Number(form.value.vehicleLength) : undefined,
-    })
-
-    success.value = 'Reservation creee avec succes. Redirection vers mes reservations...'
-    setTimeout(() => {
-      router.push({ name: 'reservations' })
-    }, 2000)
-  } catch (err) {
-    localError.value = getErrorMessage(err)
+      guests: Number(form.value.guests),
+    }
+    if (campsite.value?.type === 'vr') {
+      payload.vehicleLength = Number(form.value.vehicleLength)
+    }
+    await reservationsStore.createReservation(payload)
+    success.value = 'Réservation effectuée avec succès !'
+    setTimeout(() => router.push({ name: 'reservations' }), 1500)
+  } catch (e) {
+    error.value = e?.message || 'Erreur lors de la réservation.'
+  } finally {
+    loading.value = false
   }
 }
-
-onMounted(async () => {
-  try {
-    await campsitesStore.fetchCampsite(route.params.id)
-  } catch (err) {
-    localError.value = getErrorMessage(err)
-  }
-})
 </script>
+
 
 
 
