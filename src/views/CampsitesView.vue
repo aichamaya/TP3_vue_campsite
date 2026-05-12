@@ -1,5 +1,5 @@
 <template>
-  <section class="max-w-5xl mx-auto space-y-6">
+  <section class="space-y-6">
     <div class="page-header">
       <div>
         <h1 class="page-title">Emplacements</h1>
@@ -19,7 +19,6 @@
         <option value="arrière-pays">Arrière-pays</option>
         <option value="autre">Autre</option>
       </select>
-
       <button @click="resetFilter" class="reset-btn">Réinitialiser</button>
     </div>
 
@@ -89,6 +88,7 @@ function resetFilter() {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  margin-bottom: 5px;
 }
 
 .filter-select {

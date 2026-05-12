@@ -1,8 +1,10 @@
 <template>
   <section class="reservation-detail-view">
-    <RouterLink :to="{ name: 'reservations' }" class="back-link">
-      Retour aux reservations
-    </RouterLink>
+    <nav class="breadcrumb">
+      <RouterLink :to="{ name: 'reservations' }" class="breadcrumb-link">Mes réservations</RouterLink>
+      <span class="breadcrumb-sep">›</span>
+      <span>Détail</span>
+    </nav>
 
     <p v-if="reservationsStore.loading && !reservation" class="status-text">
       Chargement de la reservation...
@@ -20,8 +22,15 @@
         <div class="card-head">
           <div>
             <span class="section-kicker">Reservation</span>
-            <h1>{{ campsite?.name || 'Emplacement reserve' }}</h1>
-            <p>{{ campsite?.location || 'Information de localisation indisponible' }}</p>
+            <RouterLink
+              v-if="campsite?._id"
+              :to="{ name: 'campsite-detail', params: { id: campsite._id } }"
+              class="detail-link"
+            >
+              <h1>{{ campsite.name }}</h1>
+            </RouterLink>
+            <h1 v-else>{{ reservation.campsite?.name || 'Emplacement reservé' }}</h1>
+            <p>{{ campsite?.location || '' }}</p>
           </div>
 
           <strong class="status-badge" :class="getStatusClass(reservation.status)">
@@ -47,20 +56,38 @@
           <p v-if="reservation.vehicleLength">
             <strong>Longueur vehicule :</strong> {{ reservation.vehicleLength }} m
           </p>
+          <p v-if="campsite?.type">
+            <strong>Type :</strong> {{ campsite.type }}
+          </p>
           <p><strong>Total :</strong> {{ reservation.totalPrice }} $</p>
+        </div>
+
+        <div v-if="auth.isAdmin && reservation.user" class="client-info">
+          <h3>Informations du client</h3>
+          <p v-if="reservation.user.firstName || reservation.user.lastName">
+            <strong>Nom :</strong> {{ reservation.user.firstName }} {{ reservation.user.lastName }}
+          </p>
+          <p v-if="reservation.user.email">
+            <strong>Courriel :</strong> {{ reservation.user.email }}
+          </p>
+          <p v-if="reservation.user.phone">
+            <strong>Telephone :</strong> {{ reservation.user.phone }}
+          </p>
         </div>
 
 
         <div v-if="!hasInvoice" class="action-row">
-          <button
-            v-if="reservation.status === 'pending'"
-            type="button"
-            class="cancel-button"
-            :disabled="reservationsStore.loading"
-            @click="updateStatus('cancelled', 'Reservation annulee avec succes.')"
-          >
-            Annuler
-          </button>
+          <template v-if="!auth.isAdmin">
+            <button
+              v-if="reservation.status === 'pending'"
+              type="button"
+              class="cancel-button"
+              :disabled="reservationsStore.loading"
+              @click="updateStatus('cancelled', 'Reservation annulee avec succes.')"
+            >
+              Annuler
+            </button>
+          </template>
 
           <template v-if="auth.isAdmin">
             <button
@@ -71,6 +98,15 @@
               @click="updateStatus('confirmed', 'Reservation confirmee avec succes.')"
             >
               Confirmer
+            </button>
+            <button
+              v-if="reservation.status !== 'cancelled'"
+              type="button"
+              class="cancel-button"
+              :disabled="reservationsStore.loading"
+              @click="updateStatus('cancelled', 'Reservation annulee avec succes.')"
+            >
+              Annuler
             </button>
             <button
               v-if="reservation.status !== 'pending'"
@@ -232,10 +268,41 @@ onMounted(async () => {
   gap: 1.25rem;
 }
 
-.back-link {
-  width: fit-content;
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #52606d;
+}
+
+.breadcrumb-link {
   color: #2b6cb0;
   font-weight: 700;
+}
+
+.breadcrumb-sep {
+  color: #9aa5b1;
+}
+
+.client-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #f0f4f8;
+  border: 1px solid #d9e2ec;
+}
+
+.client-info h3 {
+  font-weight: 700;
+  color: #102a43;
+  margin-bottom: 0.5rem;
+}
+
+.client-info p {
+  margin-top: 0.3rem;
+  color: #334e68;
+  font-size: 0.92rem;
 }
 
 .status-text {

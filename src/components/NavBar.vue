@@ -32,24 +32,18 @@
               >Mes réservations</RouterLink
             >
             <RouterLink
+              v-if="auth.isAdmin"
+              :to="{ name: 'admin-reservations' }"
+              class="nav-link"
+              :class="{ 'nav-link-active': reservationsActive }"
+              >Réservations</RouterLink
+            >
+            <RouterLink
               :to="{ name: 'profile' }"
               class="nav-link"
               :class="{ 'nav-link-active': profileActive }"
               >{{ userName }}</RouterLink
             >
-            <div v-if="auth.isAdmin" class="admin-menu">
-              <button class="nav-link nav-button" type="button">Admin</button>
-              <div class="admin-menu-list">
-                <RouterLink :to="{ name: 'admin-campsites' }" class="admin-link"
-                  >Emplacements</RouterLink
-                >
-                <RouterLink :to="{ name: 'admin-reservations' }" class="admin-link"
-                  >Réservations</RouterLink
-                >
-                <!--RouterLink :to="{ name: 'admin-invoices' }" class="admin-link"
-                  >Factures</RouterLink
-              --></div>
-            </div>
           </template>
         </div>
       </div>
@@ -101,7 +95,15 @@
           :to="{ name: 'reservations' }"
           class="mobile-link"
           :class="{ 'mobile-link-active': reservationsActive }"
-          >Mes reservations</RouterLink
+          >Mes réservations</RouterLink
+        >
+        <RouterLink
+          v-if="auth.isAdmin"
+          @click="mobileOpen = false"
+          :to="{ name: 'admin-reservations' }"
+          class="mobile-link"
+          :class="{ 'mobile-link-active': reservationsActive }"
+          >Réservations</RouterLink
         >
         <RouterLink
           @click="mobileOpen = false"
@@ -110,28 +112,8 @@
           :class="{ 'mobile-link-active': profileActive }"
           >{{ userName }}</RouterLink
         >
-        <template v-if="auth.isAdmin">
-          <RouterLink
-            @click="mobileOpen = false"
-            :to="{ name: 'admin-campsites' }"
-            class="mobile-link"
-            >Admin - Emplacements</RouterLink
-          >
-          <RouterLink
-            @click="mobileOpen = false"
-            :to="{ name: 'admin-reservations' }"
-            class="mobile-link"
-            >Admin - Reservations</RouterLink
-          >
-          <RouterLink
-            @click="mobileOpen = false"
-            :to="{ name: 'admin-invoices' }"
-            class="mobile-link"
-            >Admin - Factures</RouterLink
-          >
-        </template>
         <button @click="handleLogout" class="mobile-link mobile-button" type="button">
-          Deconnexion
+          Déconnexion
         </button>
       </template>
 

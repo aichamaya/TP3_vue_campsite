@@ -60,7 +60,7 @@ const emit = defineEmits(['close'])
 }
 
 .alert-title {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .alert-text {

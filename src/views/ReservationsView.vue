@@ -1,5 +1,5 @@
 <template>
-  <section class="max-w-6xl mx-auto space-y-6">
+  <section class="space-y-6">
 
     <select v-model="filter" class="border p-2 rounded mb-4">
       <option value="all">Toutes</option>
@@ -81,9 +81,12 @@
 
     </table>
 
-    <p v-if="!filtered.length" class="text-center text-slate-500">
-      Aucune réservation
-    </p>
+    <div v-if="!filtered.length" class="text-center text-slate-500 py-6 space-y-2">
+      <p>Aucune réservation trouvée.</p>
+      <RouterLink :to="{ name: 'campsites' }" class="text-orange-500 font-semibold hover:underline">
+        Voir les emplacements disponibles →
+      </RouterLink>
+    </div>
 
   </section>
 </template>

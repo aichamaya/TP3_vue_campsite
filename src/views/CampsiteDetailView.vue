@@ -1,27 +1,38 @@
 <template>
-  <section class="max-w-5xl mx-auto space-y-6">
+  <section class="space-y-6">
 
     
     <div v-if="campsite" class="bg-white p-6 rounded-xl shadow space-y-3">
 
-      <h1 class="text-2xl font-bold">
-        {{ campsite.name }}
-      </h1>
+      <div class="flex justify-between items-start">
+        <h1 class="text-2xl font-bold">{{ campsite.name }}</h1>
+        <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
+          {{ campsite.type }}
+        </span>
+      </div>
 
-      <p class="text-slate-600">
-        {{ campsite.description }}
-      </p>
+      <p class="text-slate-600">{{ campsite.description }}</p>
 
       <p>📍 {{ campsite.location }}</p>
       <p>👥 {{ campsite.capacity }} personnes</p>
 
       <p v-if="campsite.maxVehicleLength">
-        🚐 {{ campsite.maxVehicleLength }} m
+        🚐 Max. {{ campsite.maxVehicleLength }} m
       </p>
 
       <p class="text-orange-500 font-bold">
         {{ campsite.pricePerNight }}$ / nuit
       </p>
+
+      <div v-if="campsite.amenities && campsite.amenities.length" class="flex flex-wrap gap-2 pt-1">
+        <span
+          v-for="a in campsite.amenities"
+          :key="a"
+          class="text-xs bg-orange-50 border border-orange-200 text-orange-700 px-2 py-1 rounded-full"
+        >
+          {{ amenityIcon(a) }} {{ a }}
+        </span>
+      </div>
 
     </div>
 
@@ -46,7 +57,7 @@
         <p class="text-slate-500 text-sm">Les administrateurs ne peuvent pas effectuer de réservation.</p>
       </div>
 
-      <form v-else @submit.prevent="handleReserve" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <form v-else novalidate @submit.prevent="handleReserve" class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
         <input v-model="form.startDate" type="date" class="border p-2 rounded" />
 
@@ -114,6 +125,12 @@ import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+
+const AMENITY_ICONS = {
+  'électricité': '⚡', 'eau': '💧', 'égout': '🔧', 'feu de camp': '🔥',
+  'table de pique-nique': '🪑', 'abri': '⛺', 'wifi': '📶', 'douche': '🚿', 'toilettes': '🚻',
+}
+function amenityIcon(name) { return AMENITY_ICONS[name] || '•' }
 const campsitesStore = useCampsitesStore()
 const reservationsStore = useReservationsStore()
 const authStore = useAuthStore()
@@ -203,7 +220,7 @@ async function handleReserve() {
     }
     await reservationsStore.createReservation(payload)
     success.value = 'Réservation effectuée avec succès !'
-    setTimeout(() => router.push({ name: 'reservations' }), 1500)
+    setTimeout(() => router.push({ name: 'reservations' }), 2000)
   } catch (e) {
     error.value = e?.message || 'Erreur lors de la réservation.'
   } finally {

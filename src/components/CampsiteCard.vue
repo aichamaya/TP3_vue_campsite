@@ -27,6 +27,16 @@
       </span>
     </div>
 
+    <div v-if="campsite.amenities && campsite.amenities.length" class="flex flex-wrap gap-1">
+      <span
+        v-for="a in campsite.amenities"
+        :key="a"
+        class="text-xs bg-orange-50 border border-orange-200 text-orange-700 px-2 py-0.5 rounded-full"
+      >
+        {{ amenityIcon(a) }} {{ a }}
+      </span>
+    </div>
+
     <div class="flex justify-between items-center pt-2 border-t">
 
       <p class="text-orange-500 font-bold text-lg">
@@ -55,6 +65,22 @@ defineProps({
 })
 
 const auth = useAuthStore()
+
+const AMENITY_ICONS = {
+  'électricité': '⚡',
+  'eau': '💧',
+  'égout': '🔧',
+  'feu de camp': '🔥',
+  'table de pique-nique': '🪑',
+  'abri': '⛺',
+  'wifi': '📶',
+  'douche': '🚿',
+  'toilettes': '🚻',
+}
+
+function amenityIcon(name) {
+  return AMENITY_ICONS[name] || '•'
+}
 </script>
 <style scoped>
 .campsite-card {

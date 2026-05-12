@@ -75,10 +75,15 @@
             <textarea v-model="form.description" rows="3" />
           </label>
 
-          <label class="field-group field-wide">
+          <div class="field-group field-wide">
             <span>Equipements</span>
-            <input v-model="form.amenities" type="text" placeholder="eau, wifi, douche" />
-          </label>
+            <div class="amenities-grid">
+              <label v-for="a in AMENITIES_LIST" :key="a" class="amenity-checkbox">
+                <input type="checkbox" :value="a" v-model="form.amenities" />
+                {{ a }}
+              </label>
+            </div>
+          </div>
 
           <div class="action-row">
             <button type="button" class="secondary-button" @click="resetForm">Reinitialiser</button>
@@ -150,6 +155,11 @@ import { useCampsitesStore } from '@/stores/campsites'
 
 const campsitesStore = useCampsitesStore()
 
+const AMENITIES_LIST = [
+  'électricité', 'eau', 'égout', 'feu de camp',
+  'table de pique-nique', 'abri', 'wifi', 'douche', 'toilettes',
+]
+
 const editingId = ref(null)
 const showFormModal = ref(false)
 const campsiteToDelete = ref(null)
@@ -163,7 +173,7 @@ const form = ref({
   pricePerNight: '',
   capacity: '',
   maxVehicleLength: '',
-  amenities: '',
+  amenities: [],
 })
 
 const campsites = computed(() => campsitesStore.campsites)
@@ -179,7 +189,7 @@ function resetForm() {
     pricePerNight: '',
     capacity: '',
     maxVehicleLength: '',
-    amenities: '',
+    amenities: [],
   }
 }
 
@@ -220,7 +230,7 @@ function fillForm(item) {
     pricePerNight: item.pricePerNight,
     capacity: item.capacity,
     maxVehicleLength: item.maxVehicleLength || '',
-    amenities: (item.amenities || []).join(', '),
+    amenities: Array.isArray(item.amenities) ? [...item.amenities] : [],
   }
   showFormModal.value = true
 }
@@ -234,10 +244,7 @@ function getPayload() {
     pricePerNight: Number(form.value.pricePerNight),
     capacity: Number(form.value.capacity),
     maxVehicleLength: form.value.type === 'rv' ? Number(form.value.maxVehicleLength) : undefined,
-    amenities: form.value.amenities
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean),
+    amenities: [...form.value.amenities],
   }
 }
 
@@ -279,14 +286,16 @@ async function handleSubmit() {
 async function handleDelete() {
   if (!campsiteToDelete.value) return
   success.value = ''
+  campsitesStore.error = ''
 
   try {
     await campsitesStore.deleteCampsite(campsiteToDelete.value._id)
     success.value = 'Emplacement supprime.'
     campsiteToDelete.value = null
     await loadCampsites()
-  } catch {
-    // je gere deja l'erreur dans le store (campsitesStore.error)
+  } catch (err) {
+    campsitesStore.error = err?.message || 'Erreur lors de la suppression.'
+    campsiteToDelete.value = null
   }
 }
 
@@ -400,6 +409,22 @@ onMounted(async () => {
 
 .field-wide {
   grid-column: 1 / -1;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.amenity-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  color: #243b53;
+  cursor: pointer;
 }
 
 .field-error {

@@ -54,7 +54,7 @@
           </label>
 
           <button type="submit" class="primary-button" :disabled="profileLoading">
-            {{ profileLoading ? 'Modification...' : 'Modifier' }}
+            {{ profileLoading ? 'Enregistrement...' : 'Enregistrer' }}
           </button>
         </form>
       </section>
