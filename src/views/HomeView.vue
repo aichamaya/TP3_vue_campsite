@@ -3,12 +3,9 @@
     <div class="relative rounded-2xl overflow-hidden shadow">
       <img src="/hero.png" class="w-full h-[420px] object-cover object-center" />
 
-      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-
-      <div class="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg">CampXplore</h1>
-        <p class="mt-2 text-lg text-white/90 drop-shadow">Trouve ton emplacement facilement.</p>
-      </div>
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"
+      ></div>
 
       <div class="absolute bottom-6 left-6">
         <button
@@ -21,7 +18,11 @@
     </div>
 
     <div class="bg-white p-4 rounded-xl shadow">
-      <form @submit.prevent="handleSearch" novalidate class="flex flex-col md:flex-row gap-3 items-start">
+      <form
+        @submit.prevent="handleSearch"
+        novalidate
+        class="flex flex-col md:flex-row gap-3 items-start"
+      >
         <div class="w-full">
           <input v-model="form.startDate" type="date" class="border p-2 rounded w-full" />
           <small v-if="errors.startDate" class="text-red-600 text-xs">{{ errors.startDate }}</small>
@@ -43,7 +44,9 @@
           <option value="arrière-pays">Arrière-pays</option>
         </select>
 
-        <button class="bg-orange-500 text-white px-4 py-2 rounded w-full md:w-auto whitespace-nowrap">
+        <button
+          class="bg-orange-500 text-white px-4 py-2 rounded w-full md:w-auto whitespace-nowrap"
+        >
           Rechercher
         </button>
       </form>

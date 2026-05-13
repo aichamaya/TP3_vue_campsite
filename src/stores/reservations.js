@@ -1,91 +1,105 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import { apiFetch } from '../utiles/apiFetch'
 
-export const useReservationsStore = defineStore('reservations', {
-  state: () => ({
-    reservations: [],
-    reservation: null,
-    loading: false,
-    error: ''
-  }),
+export const useReservationsStore = defineStore('reservations', () => {
+  const reservations = ref([])
+  const reservation = ref(null)
+  const loading = ref(false)
+  const error = ref('')
 
-  actions: {
-    async fetchReservations() {
-      this.loading = true
-      this.error = ''
-      try {
-        const data = await apiFetch('/api/reservations')
-        this.reservations = Array.isArray(data) ? data : (data.reservations ?? data.data ?? [])
-      } catch (e) {
-        this.error = 'Erreur chargement'
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async fetchReservation(id) {
-      this.loading = true
-      this.error = ''
-      try {
-        const data = await apiFetch(`/api/reservations/${id}`)
-        this.reservation = data
-      } catch (e) {
-        this.error = 'Erreur détail'
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async createReservation(payload) {
-      this.loading = true
-      this.error = ''
-      try {
-        const data = await apiFetch('/api/reservations', {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        })
-        this.reservation = data
-      } catch (e) {
-        this.error = e?.message || 'Erreur création'
-        throw e
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async cancelReservation(id) {
-      this.loading = true
-      this.error = ''
-      try {
-        await apiFetch(`/api/reservations/${id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ status: 'cancelled' })
-        })
-        await this.fetchReservations()
-      } catch (e) {
-        this.error = e?.message || 'Erreur annulation'
-        throw e
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async updateReservationStatus(id, status) {
-      this.loading = true
-      this.error = ''
-      try {
-        const data = await apiFetch(`/api/reservations/${id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ status })
-        })
-        this.reservation = data
-        return data
-      } catch (e) {
-        this.error = e?.message || 'Erreur modification statut'
-        throw e
-      } finally {
-        this.loading = false
-      }
+  async function fetchReservations() {
+    loading.value = true
+    error.value = ''
+    try {
+      const data = await apiFetch('/api/reservations')
+      reservations.value = Array.isArray(data) ? data : (data.reservations ?? data.data ?? [])
+      return reservations.value
+    } catch (e) {
+      error.value = 'Erreur chargement'
+      throw e
+    } finally {
+      loading.value = false
     }
+  }
+
+  async function fetchReservation(id) {
+    loading.value = true
+    error.value = ''
+    try {
+      const data = await apiFetch(`/api/reservations/${id}`)
+      reservation.value = data
+      return reservation.value
+    } catch (e) {
+      error.value = 'Erreur détail'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function createReservation(payload) {
+    loading.value = true
+    error.value = ''
+    try {
+      const data = await apiFetch('/api/reservations', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+      reservation.value = data
+      return reservation.value
+    } catch (e) {
+      error.value = e?.message || 'Erreur création'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function cancelReservation(id) {
+    loading.value = true
+    error.value = ''
+    try {
+      await apiFetch(`/api/reservations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'cancelled' }),
+      })
+      return await fetchReservations()
+    } catch (e) {
+      error.value = e?.message || 'Erreur annulation'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateReservationStatus(id, status) {
+    loading.value = true
+    error.value = ''
+    try {
+      const data = await apiFetch(`/api/reservations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+      reservation.value = data
+      return data
+    } catch (e) {
+      error.value = e?.message || 'Erreur modification statut'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return {
+    reservations,
+    reservation,
+    loading,
+    error,
+    fetchReservations,
+    fetchReservation,
+    createReservation,
+    cancelReservation,
+    updateReservationStatus,
   }
 })

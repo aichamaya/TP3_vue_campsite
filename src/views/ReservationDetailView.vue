@@ -1,7 +1,9 @@
 <template>
   <section class="reservation-detail-view">
     <nav class="breadcrumb">
-      <RouterLink :to="{ name: 'reservations' }" class="breadcrumb-link">Mes réservations</RouterLink>
+      <RouterLink :to="{ name: 'reservations' }" class="breadcrumb-link"
+        >Mes réservations</RouterLink
+      >
       <span class="breadcrumb-sep">›</span>
       <span>Détail</span>
     </nav>
@@ -56,9 +58,7 @@
           <p v-if="reservation.vehicleLength">
             <strong>Longueur vehicule :</strong> {{ reservation.vehicleLength }} m
           </p>
-          <p v-if="campsite?.type">
-            <strong>Type :</strong> {{ campsite.type }}
-          </p>
+          <p v-if="campsite?.type"><strong>Type :</strong> {{ campsite.type }}</p>
           <p><strong>Total :</strong> {{ reservation.totalPrice }} $</p>
         </div>
 
@@ -74,7 +74,6 @@
             <strong>Telephone :</strong> {{ reservation.user.phone }}
           </p>
         </div>
-
 
         <div v-if="!hasInvoice" class="action-row">
           <template v-if="!auth.isAdmin">

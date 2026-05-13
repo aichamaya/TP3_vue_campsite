@@ -1,6 +1,5 @@
 <template>
   <section class="space-y-6">
-
     <select v-model="filter" class="border p-2 rounded mb-4">
       <option value="all">Toutes</option>
       <option value="pending">En attente</option>
@@ -9,7 +8,6 @@
     </select>
 
     <table class="w-full bg-white rounded shadow overflow-hidden">
-
       <thead class="bg-orange-100">
         <tr class="text-left">
           <th class="p-2">Emplacement</th>
@@ -23,9 +21,7 @@
       </thead>
 
       <tbody>
-
         <tr v-for="r in filtered" :key="r.id" class="border-t">
-
           <td class="p-2">{{ r.campsite?.name || r.campsiteName || '—' }}</td>
           <td class="p-2">{{ r.startDate?.slice(0, 10) }}</td>
           <td class="p-2">{{ r.endDate?.slice(0, 10) }}</td>
@@ -58,9 +54,18 @@
               :to="{ name: 'reservation-detail', params: { id: r._id } }"
               class="bg-orange-500 text-white px-2 py-1 rounded text-xs inline-flex items-center gap-1"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path
+                  fill-rule="evenodd"
+                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                  clip-rule="evenodd"
+                />
               </svg>
             </RouterLink>
 
@@ -69,16 +74,22 @@
               @click="cancelReservation(r._id)"
               class="bg-red-500 text-white px-2 py-1 rounded text-xs inline-flex items-center gap-1"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
               </svg>
             </button>
           </td>
-
         </tr>
-
       </tbody>
-
     </table>
 
     <div v-if="!filtered.length" class="text-center text-slate-500 py-6 space-y-2">
@@ -87,7 +98,6 @@
         Voir les emplacements disponibles →
       </RouterLink>
     </div>
-
   </section>
 </template>
 <script setup>
@@ -105,16 +115,13 @@ onMounted(() => {
 
 const filtered = computed(() => {
   if (filter.value === 'all') return reservationsStore.reservations
-  return reservationsStore.reservations.filter(r => r.status === filter.value)
+  return reservationsStore.reservations.filter((r) => r.status === filter.value)
 })
 
 function cancelReservation(id) {
   reservationsStore.cancelReservation(id)
 }
 </script>
-
-
-
 
 <style scoped>
 .reservations-view {

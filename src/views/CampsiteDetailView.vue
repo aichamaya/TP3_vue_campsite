@@ -1,9 +1,6 @@
 <template>
   <section class="space-y-6">
-
-    
     <div v-if="campsite" class="bg-white p-6 rounded-xl shadow space-y-3">
-
       <div class="flex justify-between items-start">
         <h1 class="text-2xl font-bold">{{ campsite.name }}</h1>
         <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
@@ -13,16 +10,12 @@
 
       <p class="text-slate-600">{{ campsite.description }}</p>
 
-      <p>📍 {{ campsite.location }}</p>
-      <p>👥 {{ campsite.capacity }} personnes</p>
+      <p>{{ campsite.location }}</p>
+      <p>{{ campsite.capacity }} personnes</p>
 
-      <p v-if="campsite.maxVehicleLength">
-        🚐 Max. {{ campsite.maxVehicleLength }} m
-      </p>
+      <p v-if="campsite.maxVehicleLength">Max. {{ campsite.maxVehicleLength }} m</p>
 
-      <p class="text-orange-500 font-bold">
-        {{ campsite.pricePerNight }}$ / nuit
-      </p>
+      <p class="text-orange-500 font-bold">{{ campsite.pricePerNight }}$ / nuit</p>
 
       <div v-if="campsite.amenities && campsite.amenities.length" class="flex flex-wrap gap-2 pt-1">
         <span
@@ -33,17 +26,15 @@
           {{ amenityIcon(a) }} {{ a }}
         </span>
       </div>
-
     </div>
 
-  
     <div class="bg-white p-6 rounded-xl shadow space-y-4">
+      <h2 class="font-semibold text-lg">Réserver</h2>
 
-      <h2 class="font-semibold text-lg">
-        Réserver
-      </h2>
-
-      <div v-if="!authStore.isAuthenticated" class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center space-y-2">
+      <div
+        v-if="!authStore.isAuthenticated"
+        class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center space-y-2"
+      >
         <p class="text-orange-700">Vous devez être connecté pour réserver.</p>
         <button
           @click="router.push({ name: 'login', query: { redirect: route.fullPath } })"
@@ -53,12 +44,21 @@
         </button>
       </div>
 
-      <div v-else-if="authStore.isAdmin" class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center">
-        <p class="text-slate-500 text-sm">Les administrateurs ne peuvent pas effectuer de réservation.</p>
+      <div
+        v-else-if="authStore.isAdmin"
+        class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center"
+      >
+        <p class="text-slate-500 text-sm">
+          Les administrateurs ne peuvent pas effectuer de réservation.
+        </p>
       </div>
 
-      <form v-else novalidate @submit.prevent="handleReserve" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-
+      <form
+        v-else
+        novalidate
+        @submit.prevent="handleReserve"
+        class="grid grid-cols-1 md:grid-cols-3 gap-3"
+      >
         <input v-model="form.startDate" type="date" class="border p-2 rounded" />
 
         <input v-model="form.endDate" type="date" class="border p-2 rounded" />
@@ -93,16 +93,11 @@
         >
           {{ loading ? 'Réservation en cours...' : 'Réserver' }}
         </button>
-
       </form>
 
-      <p>
-        Nuits : {{ nights }}
-      </p>
+      <p>Nuits : {{ nights }}</p>
 
-      <p class="font-bold text-orange-500">
-        Total : {{ total }}$
-      </p>
+      <p class="font-bold text-orange-500">Total : {{ total }}$</p>
 
       <p v-if="error" class="text-red-500">
         {{ error }}
@@ -111,9 +106,7 @@
       <p v-if="success" class="text-green-500">
         {{ success }}
       </p>
-
     </div>
-
   </section>
 </template>
 <script setup>
@@ -127,10 +120,19 @@ const route = useRoute()
 const router = useRouter()
 
 const AMENITY_ICONS = {
-  'électricité': '⚡', 'eau': '💧', 'égout': '🔧', 'feu de camp': '🔥',
-  'table de pique-nique': '🪑', 'abri': '⛺', 'wifi': '📶', 'douche': '🚿', 'toilettes': '🚻',
+  électricité: '⚡',
+  eau: '💧',
+  égout: '🔧',
+  'feu de camp': '🔥',
+  'table de pique-nique': '🪑',
+  abri: '⛺',
+  wifi: '📶',
+  douche: '🚿',
+  toilettes: '🚻',
 }
-function amenityIcon(name) { return AMENITY_ICONS[name] || '•' }
+function amenityIcon(name) {
+  return AMENITY_ICONS[name] || '•'
+}
 const campsitesStore = useCampsitesStore()
 const reservationsStore = useReservationsStore()
 const authStore = useAuthStore()
@@ -144,7 +146,7 @@ const form = ref({
   startDate: today,
   endDate: tomorrow,
   guests: 1,
-  vehicleLength: null
+  vehicleLength: null,
 })
 
 const error = ref('')
@@ -202,7 +204,10 @@ async function handleReserve() {
     error.value = 'La longueur du véhicule est requise pour les emplacements VR.'
     return
   }
-  if (campsite.value?.maxVehicleLength && form.value.vehicleLength > campsite.value.maxVehicleLength) {
+  if (
+    campsite.value?.maxVehicleLength &&
+    form.value.vehicleLength > campsite.value.maxVehicleLength
+  ) {
     error.value = `La longueur maximale acceptée est ${campsite.value.maxVehicleLength} m.`
     return
   }
@@ -228,9 +233,6 @@ async function handleReserve() {
   }
 }
 </script>
-
-
-
 
 <style scoped>
 .detail-view {

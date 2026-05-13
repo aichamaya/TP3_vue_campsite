@@ -1,13 +1,12 @@
 <template>
   <div class="bg-white rounded-xl shadow p-4 space-y-3">
-
     <div class="flex justify-between items-start">
       <div>
         <h3 class="font-bold text-lg">
           {{ campsite.name }}
         </h3>
         <p class="text-sm text-slate-500">
-          📍 {{ campsite.location }}
+          {{ campsite.location }}
         </p>
       </div>
 
@@ -21,10 +20,8 @@
     </p>
 
     <div class="flex gap-3 text-sm text-slate-500">
-      <span>👥 {{ campsite.capacity }} pers.</span>
-      <span v-if="campsite.maxVehicleLength">
-        🚐 {{ campsite.maxVehicleLength }} m
-      </span>
+      <span>{{ campsite.capacity }} pers.</span>
+      <span v-if="campsite.maxVehicleLength"> {{ campsite.maxVehicleLength }} m </span>
     </div>
 
     <div v-if="campsite.amenities && campsite.amenities.length" class="flex flex-wrap gap-1">
@@ -38,10 +35,7 @@
     </div>
 
     <div class="flex justify-between items-center pt-2 border-t">
-
-      <p class="text-orange-500 font-bold text-lg">
-        {{ campsite.pricePerNight }}$ / nuit
-      </p>
+      <p class="text-orange-500 font-bold text-lg">{{ campsite.pricePerNight }}$ / nuit</p>
 
       <RouterLink
         v-if="!auth.isAdmin"
@@ -50,9 +44,7 @@
       >
         Réserver
       </RouterLink>
-
     </div>
-
   </div>
 </template>
 
@@ -61,21 +53,21 @@ import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 defineProps({
-  campsite: Object
+  campsite: Object,
 })
 
 const auth = useAuthStore()
 
 const AMENITY_ICONS = {
-  'électricité': '⚡',
-  'eau': '💧',
-  'égout': '🔧',
+  électricité: '⚡',
+  eau: '💧',
+  égout: '🔧',
   'feu de camp': '🔥',
   'table de pique-nique': '🪑',
-  'abri': '⛺',
-  'wifi': '📶',
-  'douche': '🚿',
-  'toilettes': '🚻',
+  abri: '⛺',
+  wifi: '📶',
+  douche: '🚿',
+  toilettes: '🚻',
 }
 
 function amenityIcon(name) {

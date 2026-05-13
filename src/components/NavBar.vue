@@ -39,10 +39,11 @@
               >Réservations</RouterLink
             >
             <RouterLink
-              :to="{ name: 'profile' }"
+              v-if="auth.isAdmin"
+              :to="{ name: 'admin-campsites' }"
               class="nav-link"
-              :class="{ 'nav-link-active': profileActive }"
-              >{{ userName }}</RouterLink
+              :class="{ 'nav-link-active': adminCampsitesActive }"
+              >Gestion emplacements</RouterLink
             >
           </template>
         </div>
@@ -106,11 +107,12 @@
           >Réservations</RouterLink
         >
         <RouterLink
+          v-if="auth.isAdmin"
           @click="mobileOpen = false"
-          :to="{ name: 'profile' }"
+          :to="{ name: 'admin-campsites' }"
           class="mobile-link"
-          :class="{ 'mobile-link-active': profileActive }"
-          >{{ userName }}</RouterLink
+          :class="{ 'mobile-link-active': adminCampsitesActive }"
+          >Gestion emplacements</RouterLink
         >
         <button @click="handleLogout" class="mobile-link mobile-button" type="button">
           Déconnexion
@@ -150,8 +152,10 @@ const campsitesActive = computed(
 const reservationsActive = computed(
   () => route.name === 'reservations' || route.name === 'reservation-detail',
 )
+const adminCampsitesActive = computed(() => route.name === 'admin-campsites')
 const profileActive = computed(() => route.name === 'profile')
 const loginActive = computed(() => route.name === 'login')
+
 const userName = computed(() => {
   const firstName = auth.user?.firstName || ''
   const lastName = auth.user?.lastName || ''

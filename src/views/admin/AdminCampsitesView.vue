@@ -50,7 +50,7 @@
 
           <label class="field-group">
             <span>Prix par nuit</span>
-            <input v-model="form.pricePerNight" type="number" step="0.01" />
+            <input v-model="form.pricePerNight" min="0" type="number" step="0.01" />
             <small v-if="errors.pricePerNight" class="field-error">{{
               errors.pricePerNight
             }}</small>
@@ -58,7 +58,7 @@
 
           <label class="field-group">
             <span>Capacite</span>
-            <input v-model="form.capacity" type="number" />
+            <input v-model="form.capacity" min="0" type="number" />
             <small v-if="errors.capacity" class="field-error">{{ errors.capacity }}</small>
           </label>
 
@@ -132,18 +132,52 @@
         <span>{{ item.pricePerNight }} $</span>
         <span>{{ item.capacity }}</span>
         <span class="action-row">
-          <button type="button" class="small-button primary" title="Modifier" @click="fillForm(item)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+          <button
+            type="button"
+            class="small-button primary"
+            title="Modifier"
+            @click="fillForm(item)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+              />
             </svg>
           </button>
-          <button type="button" class="small-button danger" title="Supprimer" @click="campsiteToDelete = item">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          <button
+            type="button"
+            class="small-button danger"
+            title="Supprimer"
+            @click="campsiteToDelete = item"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
         </span>
       </article>
+    </div>
+
+    <div v-else class="empty-state">
+      <h2>Aucun emplacement</h2>
+      <p>
+        Aucun emplacement n'a été trouvé.
+        <button type="button" class="link-button" @click="loadCampsites">Réessayer</button>
+      </p>
     </div>
   </section>
 </template>
@@ -152,12 +186,18 @@ import { computed, onMounted, ref } from 'vue'
 import AlertMessage from '@/components/AlertMessage.vue'
 import { useCampsitesStore } from '@/stores/campsites'
 
-
 const campsitesStore = useCampsitesStore()
 
 const AMENITIES_LIST = [
-  'électricité', 'eau', 'égout', 'feu de camp',
-  'table de pique-nique', 'abri', 'wifi', 'douche', 'toilettes',
+  'électricité',
+  'eau',
+  'égout',
+  'feu de camp',
+  'table de pique-nique',
+  'abri',
+  'wifi',
+  'douche',
+  'toilettes',
 ]
 
 const editingId = ref(null)
@@ -177,6 +217,10 @@ const form = ref({
 })
 
 const campsites = computed(() => campsitesStore.campsites)
+
+onMounted(async () => {
+  await loadCampsites()
+})
 
 function resetForm() {
   editingId.value = null
@@ -251,8 +295,10 @@ function getPayload() {
 async function loadCampsites() {
   try {
     await campsitesStore.fetchCampsites()
-  } catch {
-    // je gere deja l'erreur dans le store (campsitesStore.error)
+    console.log('Emplacements chargés:', campsites.value)
+  } catch (error) {
+    console.error('Erreur lors du chargement des emplacements:', error)
+    // Erreur déjà gérée dans le store
   }
 }
 
@@ -298,10 +344,6 @@ async function handleDelete() {
     campsiteToDelete.value = null
   }
 }
-
-onMounted(async () => {
-  await loadCampsites()
-})
 </script>
 <style scoped>
 .admin-view {
@@ -460,6 +502,31 @@ onMounted(async () => {
   color: #243b53;
 }
 
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-soft);
+  font-size: 1rem;
+}
+
+.empty-state h2 {
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.link-button:hover {
+  color: var(--color-accent-dark);
+}
+
 .small-button {
   padding: 0.55rem 0.75rem;
   color: #ffffff;
@@ -511,4 +578,3 @@ onMounted(async () => {
   }
 }
 </style>
-
