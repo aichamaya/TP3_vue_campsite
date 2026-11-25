@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div class="bg-white p-4 rounded-xl shadow">
+    <div class="mt-4 bg-white p-4 rounded-xl shadow">
       <form
         @submit.prevent="handleSearch"
         novalidate
@@ -53,7 +53,10 @@
     </div>
 
     <div v-if="searched">
-      <p class="font-semibold mb-3">{{ results.length }} emplacement(s) disponible(s)</p>
+      <p class="mt-6 mb-3 font-semibold">
+        {{ results.length }} emplacement{{ results.length === 1 ? '' : 's' }}
+        disponible{{ results.length === 1 ? '' : 's' }}
+      </p>
 
       <div v-if="results.length" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <CampsiteCard v-for="c in results" :key="c._id" :campsite="c" />

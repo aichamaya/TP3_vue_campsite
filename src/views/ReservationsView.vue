@@ -1,6 +1,6 @@
 <template>
-  <section class="space-y-6">
-    <select v-model="filter" class="border p-2 rounded mb-4">
+  <section class="grid gap-6">
+    <select v-model="filter" class="justify-self-start border p-2 rounded">
       <option value="all">Toutes</option>
       <option value="pending">En attente</option>
       <option value="confirmed">Confirmées</option>
@@ -10,25 +10,25 @@
     <table class="w-full bg-white rounded shadow overflow-hidden">
       <thead class="bg-orange-100">
         <tr class="text-left">
-          <th class="p-2">Emplacement</th>
-          <th class="p-2">Arrivée</th>
-          <th class="p-2">Départ</th>
-          <th class="p-2">Pers.</th>
-          <th class="p-2">Total</th>
-          <th class="p-2">Statut</th>
-          <th class="p-2">Actions</th>
+          <th class="p-4">Emplacement</th>
+          <th class="p-4">Arrivée</th>
+          <th class="p-4">Départ</th>
+          <th class="p-4">Pers.</th>
+          <th class="p-4">Total</th>
+          <th class="p-4">Statut</th>
+          <th class="p-4">Actions</th>
         </tr>
       </thead>
 
       <tbody>
         <tr v-for="r in filtered" :key="r.id" class="border-t">
-          <td class="p-2">{{ r.campsite?.name || r.campsiteName || '—' }}</td>
-          <td class="p-2">{{ r.startDate?.slice(0, 10) }}</td>
-          <td class="p-2">{{ r.endDate?.slice(0, 10) }}</td>
-          <td class="p-2">{{ r.guests }}</td>
-          <td class="p-2">{{ r.totalPrice ?? r.total ?? '—' }}$</td>
+          <td class="p-4">{{ r.campsite?.name || r.campsiteName || '—' }}</td>
+          <td class="p-4">{{ r.startDate?.slice(0, 10) }}</td>
+          <td class="p-4">{{ r.endDate?.slice(0, 10) }}</td>
+          <td class="p-4">{{ r.guests }}</td>
+          <td class="p-4">{{ r.totalPrice ?? r.total ?? '—' }}$</td>
 
-          <td class="p-2">
+          <td class="p-4">
             <span
               v-if="r.status === 'pending'"
               class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs"
@@ -49,7 +49,7 @@
             </span>
           </td>
 
-          <td class="p-2 flex gap-2 flex-wrap">
+          <td class="p-4 flex gap-2 flex-wrap">
             <RouterLink
               :to="{ name: 'reservation-detail', params: { id: r._id } }"
               class="bg-orange-500 text-white px-2 py-1 rounded text-xs inline-flex items-center gap-1"
@@ -92,7 +92,7 @@
       </tbody>
     </table>
 
-    <div v-if="!filtered.length" class="text-center text-slate-500 py-6 space-y-2">
+    <div v-if="!filtered.length" class="w-full text-center text-slate-500 py-6 space-y-2">
       <p>Aucune réservation trouvée.</p>
       <RouterLink :to="{ name: 'campsites' }" class="text-orange-500 font-semibold hover:underline">
         Voir les emplacements disponibles →
