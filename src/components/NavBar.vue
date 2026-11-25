@@ -51,6 +51,13 @@
 
       <div class="navbar-actions desktop-only">
         <template v-if="auth.isAuthenticated">
+          <RouterLink
+            :to="{ name: 'profile' }"
+            class="nav-link"
+            :class="{ 'nav-link-active': profileActive }"
+          >
+            {{ userName }}
+          </RouterLink>
           <button @click="handleLogout" class="nav-link nav-button" type="button">
             Déconnexion
           </button>
@@ -90,6 +97,13 @@
       >
 
       <template v-if="auth.isAuthenticated">
+        <RouterLink
+          @click="mobileOpen = false"
+          :to="{ name: 'profile' }"
+          class="mobile-link"
+          :class="{ 'mobile-link-active': profileActive }"
+          >{{ userName }}</RouterLink
+        >
         <RouterLink
           v-if="!auth.isAdmin"
           @click="mobileOpen = false"
