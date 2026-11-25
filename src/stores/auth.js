@@ -1,28 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { jwtDecode } from 'jwt-decode'
 import { apiFetch } from '../utiles/apiFetch'
-
-function decodeJwt(token) {
-  const parts = token.split('.')
-  if (parts.length !== 3) {
-    throw new Error('Jeton JWT invalide')
-  }
-  try {
-    const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-    const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4)
-    const decoded = atob(padded)
-    return JSON.parse(
-      decodeURIComponent(
-        decoded
-          .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join(''),
-      ),
-    )
-  } catch (error) {
-    throw new Error('Impossible de décoder le token JWT', { cause: error })
-  }
-}
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token'))
@@ -32,10 +11,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => {
     if (!token.value) return false
+
     try {
-      const decoded = decodeJwt(token.value)
+      const decoded = jwtDecode(token.value)
       const now = Date.now() / 1000
-      return typeof decoded.exp === 'number' && decoded.exp >= now
+      return typeof decoded.exp === 'number' && decoded.exp > now
     } catch {
       return false
     }
@@ -45,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function initialize() {
     token.value = localStorage.getItem('token')
+
     try {
       user.value = JSON.parse(localStorage.getItem('user')) || null
     } catch {
@@ -55,17 +36,22 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(email, password) {
     loading.value = true
     error.value = null
+
     try {
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       })
+
       token.value = data.token
       user.value = data.user || null
+
       localStorage.setItem('token', token.value)
+
       if (user.value) {
         localStorage.setItem('user', JSON.stringify(user.value))
       }
+
       return data
     } catch (err) {
       error.value = err
@@ -99,13 +85,16 @@ export const useAuthStore = defineStore('auth', () => {
   async function updateProfile(payload) {
     loading.value = true
     error.value = null
+
     try {
       const data = await apiFetch('/api/auth/profile', {
         method: 'PUT',
         body: JSON.stringify(payload),
       })
+
       user.value = data
       localStorage.setItem('user', JSON.stringify(user.value))
+
       return data
     } catch (e) {
       error.value = e
@@ -118,6 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function changePassword(payload) {
     loading.value = true
     error.value = null
+
     try {
       return await apiFetch('/api/auth/password', {
         method: 'PATCH',
@@ -154,3 +144,4 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
   }
 })
+// une fonction pour decoder le jwt
