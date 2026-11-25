@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-xl shadow p-4 space-y-3">
+  <div class="flex h-full flex-col bg-white rounded-xl shadow p-4 space-y-3">
     <div class="flex justify-between items-start">
       <div>
         <h3 class="font-bold text-lg">
@@ -34,7 +34,7 @@
       </span>
     </div>
 
-    <div class="flex justify-between items-center pt-2 border-t">
+    <div class="mt-auto flex justify-between items-center pt-4 border-t">
       <p class="text-orange-500 font-bold text-lg">{{ campsite.pricePerNight }}$ / nuit</p>
 
       <RouterLink
